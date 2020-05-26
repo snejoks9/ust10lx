@@ -2,7 +2,6 @@
 
 Decode::decode()
 {
-    qDebug() << "decode constructor";
 }
 
 int Decode::decodeByte(QByteArray code, int byte) {
@@ -17,18 +16,7 @@ int Decode::decodeByte(QByteArray code, int byte) {
 }
 
 QByteArray Decode::clear(QByteArray rangeData){
-
-
-    int n = 0;
-    for(int i = 0; i<rangeData.size(); i++){  // Убираем все \n
-        rangeData.remove(rangeData.indexOf("\n"),1);
-        n++;
-
-    }
-
-
-    int offset = gdresp.size()+7; // 19
-
+    int offset = 20;
 
     for(int i = 0; i<rangeData.size()-offset; i++){   // Оставляем только данные о расстоянии
         rangeData[i] = rangeData[i+offset];
@@ -40,10 +28,11 @@ QByteArray Decode::clear(QByteArray rangeData){
         rangeData.remove(64*i,1);
     }
     rangeData.remove(rangeData.size()-1,1);
-    qDebug() << "После контр" << rangeData;    return rangeData;
+    qDebug() << rangeData;
+    return rangeData;
 }
 
-void Decode::getCoordinates(QByteArray rangeData){
+void Decode::getCoordinatesFor1(QByteArray rangeData){
 
     threeBytes.append(rangeData[0+j]);
     threeBytes.append(rangeData[1+j]);
@@ -56,16 +45,27 @@ void Decode::getCoordinates(QByteArray rangeData){
         range = range/1000;
 
         tetha = (angleMin + i*angleResolution) * PI/180;
-        x = range * sin(tetha);
-        y = range * cos(tetha);
+        x = range * cos(tetha);
+        y = range * sin(tetha);
 
+        if(i % 64 == 0){
+            i = 0;
+            z += 0.03;
+        }
+        qDebug() << threeBytes << range << i << z;
         i++;
         threeBytes.clear();
-
-
     }
     j+=3;
-    n++;
+}
+
+void Decode::getCoordinatesFor2(QVector<QString> rovRaw,int i, int j){
+        double rR = rovRaw[i].toDouble();
+        angleMin = -200;
+        double tetha = (angleMin + j*angleResolution) * PI/180;
+        x = rR*sin(tetha);
+        y = rR*cos(tetha);
+
 }
 
 double Decode::getX(){
@@ -74,4 +74,8 @@ double Decode::getX(){
 
 double Decode::getY(){
     return y;
+}
+
+double Decode::getZ(){
+    return z;
 }

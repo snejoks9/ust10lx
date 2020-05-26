@@ -7,7 +7,14 @@
 #include <unistd.h>
 #include <string.h>
 #include <QVector>
-#include "drawer3d.h"
+
+#include "lidarsim.h"
+#include "decode.h"
+#include <QDebug>
+#include <QtNetwork/QHostAddress>
+#include <QtOpenGL>
+#include <iostream>
+#include <drawer3d.h>
 
 namespace Ui {
 class MainWindow;
@@ -18,10 +25,33 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
+
+    const int choose = 2;
+    const int strElem = 250;
+
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    QVector<double> getVecX();
-    QVector<double> getVecY();
+    QByteArray GD;
+    QByteArray StartStep = "0000";
+    QByteArray EndStep = "0100";
+    QByteArray ClusterCount = "00";
+    QByteArray ScanInterval = "0";
+    QByteArray NumberOfScans = "00";
+
+    void conn();
+    int getChoose();
+
+    QVector<double> mainFunc();
+
+    struct Coordinates
+    {
+        double x;
+        double y;
+        double z;
+    }coord;
+    QVector<Coordinates> CoordVec;
+    int getStrElem();
+    QVector<struct Coordinates> getvecX();
 
 public slots:
     void onConnected();
@@ -30,15 +60,11 @@ public slots:
     void resizeEvent(QResizeEvent *event);
 
 private:
+
     Ui::MainWindow *ui;
-    drawer3D* Drawer3D;
-
     QTcpSocket  _socket;
-    QVector<double> x;
-    QVector<double> y;
-
     QByteArray responseRaw;
-    int mainFunc();
+    drawer3D* Drawer3D;
 
 };
 

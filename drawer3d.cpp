@@ -1,21 +1,6 @@
 #include "drawer3d.h"
 #include "mainwindow.h"
-#include <QGLWidget>
-#include <QtOpenGL>
-#include <GL/gl.h>
-#include <QOpenGLWidget>
-#include <QOpenGLFunctions>
-#include <QGL>
-#include <QGLFormat>
-#include <QGLContext>
-#include <QGLColormap>
-#include <QGLPixelBuffer>
-#include <QGLFunctions>
-#include <QtGlobal>
-#include <d3d8types.h>
 #include "decode.h"
-
-
 
 drawer3D::drawer3D(QWidget* pwgt/*= 0*/) : QOpenGLWidget(pwgt)
 {
@@ -30,7 +15,9 @@ void drawer3D::initializeGL()
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glShadeModel(GL_SMOOTH);
-
+    MainWindow m;
+    strElemD = m.getStrElem();
+    chooseD = m.getChoose();
 }
 
 void drawer3D::resizeGL(int nWidth, int nHeight)
@@ -61,11 +48,34 @@ void drawer3D::paintGL()
     glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
 
     draw_Axis();
+    xvec.clear();
+    yvec.clear();
+    zvec.clear();
+    QFile outCoord("outcoord.txt");
+    QTextStream writeCoord(&outCoord);
+    int i = 1;
+    if(outCoord.open(QIODevice::ReadWrite| QIODevice::Text))
+    {
+        while(!writeCoord.atEnd()){
+            QString coord = writeCoord.readLine();
+            double Dcoord = coord.toDouble();
 
-    MainWindow mm;
-    QVector<double> xvec = mm.getVecX();
-    QVector<double> yvec = mm.getVecY();
-    draw(xvec,yvec);
+            if(i == 1) xvec.append(Dcoord);
+            if(i == 2) yvec.append(Dcoord);
+            if(i == 3) {
+                zvec.append(Dcoord);
+                i = 0;
+            }
+            i++;
+        }
+    }
+
+    MainWindow m;
+
+    //  QVector<MainWindow::Coordinates> test = m.getvecX();
+    //  qDebug() << test[1].x;
+    draw(xvec,yvec,zvec);
+
 }
 
 QSize drawer3D::minimumSizeHint() const
@@ -144,16 +154,32 @@ void drawer3D::wheelEvent(QWheelEvent *event)
     update();
 }
 
-void drawer3D::draw(QVector<double> xvec,QVector<double> yvec)
+void drawer3D::draw(QVector<double> xvec, QVector<double> yvec, QVector<double> zvec)
 {
-    glPointSize(2);
+    qDebug() << chooseD;
 
-    glBegin(GL_POINTS);
-    glColor4f(0.00f,0.00f,0.00f,0.00f);
+    glPointSize(4);
+    glBegin(GL_LINE_LOOP);
+    glColor3f(0.00f,0.00f,0.00f);
+    qDebug() << "elements in 1 str: " <<strElemD;
+
+    if(chooseD == 1){
         for(int j = 0; j < xvec.size(); j++){
-            glVertex3f(xvec[j], 0.5 , yvec[j]);
+            glVertex3f(zvec[j], yvec[j] + 1.2 , xvec[j]);
         }
+
+    }
+
+    if(chooseD == 2){
+        for(int j = 0; j < xvec.size()-strElemD-1; j++){
+            glVertex3f(zvec[j], yvec[j] + 1.2 , xvec[j]);
+            glVertex3f(zvec[j+1], yvec[j+1] + 1.2 , xvec[j+1]);
+            glVertex3f(zvec[j+strElemD], yvec[j+strElemD] + 1.2 , xvec[j+strElemD]);
+            glVertex3f(zvec[j+strElemD+1], yvec[j+strElemD+1] + 1.2 , xvec[j+strElemD+1]);
+        }
+    }
     glEnd();
+
 }
 
 void drawer3D::draw_Axis()

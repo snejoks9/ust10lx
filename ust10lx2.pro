@@ -21,8 +21,10 @@ LIBS += -lopengl32
 SOURCES += main.cpp\
         mainwindow.cpp \
     decode.cpp \
-    drawer3d.cpp
+    drawer3d.cpp \
+    lidarsim.cpp
 HEADERS  += mainwindow.h \
     decode.h \
-    drawer3d.h
+    drawer3d.h \
+    lidarsim.h
 FORMS    += mainwindow.ui

@@ -3,10 +3,18 @@
 #include <QOpenGLWidget>
 #include <GL/glu.h>
 #include <GL/gl.h>
+#include <QGLFormat>
+#include <QGLContext>
+#include <QGLColormap>
+#include <QGLPixelBuffer>
+#include <QGLFunctions>
+#include <QtGlobal>
+#include <QOpenGLFunctions>
+#include <QGL>
+#include <QGLWidget>
+#include <QtOpenGL>
 #include <d3d8types.h>
 
-
-// ====================================================
 class drawer3D : public QOpenGLWidget {
 
 protected:
@@ -32,7 +40,7 @@ public slots:
 
 private:
     void draw_Axis();
-    void draw(QVector<double>xvec,QVector<double>yvec);
+    void draw(QVector<double>xvec,QVector<double>yvec,QVector<double>zvec);
     void renderText(D3DVECTOR &textPosWorld, QString text);
     inline project(GLdouble objx, GLdouble objy, GLdouble objz,
                    const GLdouble model[16], const GLdouble proj[16],
@@ -42,6 +50,10 @@ private:
     int xRot;
     int yRot;
     int zRot;
+    int strElemD;
+    int chooseD;
     double zoomScale;
     QPoint lastPos;
+    QVector<double> xvec,yvec,zvec;
+
 };
